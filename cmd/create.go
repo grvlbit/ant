@@ -17,8 +17,8 @@ import (
         "regexp"
         "text/template"
         "github.com/AlecAivazis/survey/v2"
-        "gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing"
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 )
 
 // initCmd represents the init command
@@ -82,6 +82,11 @@ var qs = []*survey.Question{
         Prompt:   &survey.Input{Message: "Please enter a short role description."},
         Validate: survey.Required,
     },
+    {
+        Name:     "gitinit",
+        Prompt:   &survey.Confirm{Message: "Do you want to init the role as git repository?"},
+        Validate: survey.Required,
+    },
 }
 
 type Metadata struct {
@@ -92,6 +97,7 @@ type Metadata struct {
         Author string
         Namespace string
         Platforms []string
+	Gitinit bool
 }
 
 // CheckIfError should be used to naively panics if an error is not nil.
@@ -201,10 +207,20 @@ func createRole() {
 	copyDir := "./" + meta.Namespace + "." + meta.Name
 
 	// Create the copy directory if it doesn't exist
-	err = os.MkdirAll(copyDir, 0755)
-	if err != nil {
-		fmt.Printf("Error creating copy directory: %v\n", err)
-		return
+	if meta.Gitinit {
+		fmt.Printf("I should init the a new git repo: %v\n", meta.Gitinit)
+		_, err := git.PlainInit(copyDir, false)
+	        if err != nil {
+	        	fmt.Printf("Error initializing new repository: %v\n", err)
+	        	return
+	        }
+		// TODO: The default branch is master. We want to switch to main
+	} else {
+         	err = os.MkdirAll(copyDir, 0755)
+	        if err != nil {
+	        	fmt.Printf("Error creating copy directory: %v\n", err)
+	        	return
+	        }
 	}
 
 	// Walk through the cloned repository files and copy them to the copy directory
@@ -274,6 +290,8 @@ func createRole() {
 		fmt.Printf("Error copying files: %v\n", err)
 		return
 	}
+
+
 
         // Remove the cloned repository
 	err = os.RemoveAll(destDir)
