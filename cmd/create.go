@@ -159,7 +159,6 @@ func createRole() {
             fmt.Println(err.Error())
             return
         }
-        fmt.Printf("%v\n", meta)
     
         fmt.Println("Please check you inputs. Is everything correct?")
         if !confirm() {
@@ -199,7 +198,7 @@ func createRole() {
 	}
 
 	// Destination directory for copying files (excluding .git)
-	copyDir := "/tmp/" + meta.Namespace + "." + meta.Name
+	copyDir := "./" + meta.Namespace + "." + meta.Name
 
 	// Create the copy directory if it doesn't exist
 	err = os.MkdirAll(copyDir, 0755)
@@ -241,8 +240,6 @@ func createRole() {
                  		// Apply the regular expression replacement
 		                data = re.ReplaceAll(data, []byte(replace))
 
-		                fmt.Printf("%v\n", path)
-
 		                // Apply go templates
 		                tmpl, err := template.New("file").Delims("<<", ">>").Parse(string(data))
 		                if err != nil {
@@ -252,10 +249,6 @@ func createRole() {
 		                //var buf strings.Builder
 				var buf bytes.Buffer
 				err = tmpl.Execute(&buf, meta)
-		                if err != nil {
-		                	return err
-		                }
-				err = tmpl.Execute(os.Stdout, meta)
 		                if err != nil {
 		                	return err
 		                }
