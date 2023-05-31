@@ -237,6 +237,10 @@ func createRole() {
 		fmt.Printf("Initializing new git repo: %v\n", meta.Gitinit)
 		cmd := exec.Command("git", "init", "-b", "main", copyDir)
          	err := cmd.Start()
+	        if err != nil {
+	        	fmt.Printf("Error initializing new repository: %v\n", err)
+	        	return
+	        }
         	err = cmd.Wait()
 	        if err != nil {
 	        	fmt.Printf("Error initializing new repository: %v\n", err)
