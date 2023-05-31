@@ -1,22 +1,24 @@
 /*
 Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/spf13/cobra"
 
-	"io/ioutil"
 	"bytes"
-        "os"
+	"io/ioutil"
+	"os"
+	"os/exec"
 	"path/filepath"
-        "strings"
-        "regexp"
-        "text/template"
-        "github.com/AlecAivazis/survey/v2"
+	"regexp"
+	"strings"
+	"text/template"
+
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 )
@@ -68,6 +70,7 @@ var qs = []*survey.Question{
     			"rockylinux9",
     		},
     	},
+        Validate: survey.Required,
     },
     {
         Name: "license",
@@ -140,6 +143,19 @@ func confirm() bool {
 
 }
 
+func cleanup(dir string, err *error) {
+        // Remove the cloned repository
+	e := os.RemoveAll(dir)
+	switch *err {
+	case nil:
+		*err = e
+	default:
+		if e != nil {
+			log.Println("Cleanup failed:", e)
+		}
+	}
+}
+
 func init() {
 	rootCmd.AddCommand(initCmd)
 
@@ -172,12 +188,24 @@ func createRole() {
 		return
         }
 
+	// Destination directory for copying files (excluding .git)
+	copyDir := meta.Namespace + "." + meta.Name
+
+	if _, err := os.Stat(copyDir); !os.IsNotExist(err) {
+		fmt.Printf("Error creating role directory: Directory exists.\n")
+		return
+	}
 
 	// URL of the repository to clone
 
         repoURL := "git@github.com:hpc-unibe-ch/ansible-role-template.git"
 	// Destination directory for cloning the repository
-	destDir := "/tmp/repo"
+	destDir, err := os.MkdirTemp("","ant-")
+	if err != nil {
+		fmt.Printf("Error creating temporary directory: %v\n", err)
+		return
+	}
+        defer cleanup(destDir, &err)
 
 	// Clone the repository to the destination directory
 	_, err = git.PlainClone(destDir, false, &git.CloneOptions{
@@ -203,18 +231,17 @@ func createRole() {
 		return
 	}
 
-	// Destination directory for copying files (excluding .git)
-	copyDir := "./" + meta.Namespace + "." + meta.Name
 
 	// Create the copy directory if it doesn't exist
 	if meta.Gitinit {
-		fmt.Printf("I should init the a new git repo: %v\n", meta.Gitinit)
-		_, err := git.PlainInit(copyDir, false)
+		fmt.Printf("Initializing new git repo: %v\n", meta.Gitinit)
+		cmd := exec.Command("git", "init", "-b", "main", copyDir)
+         	err := cmd.Start()
+        	err = cmd.Wait()
 	        if err != nil {
 	        	fmt.Printf("Error initializing new repository: %v\n", err)
 	        	return
 	        }
-		// TODO: The default branch is master. We want to switch to main
 	} else {
          	err = os.MkdirAll(copyDir, 0755)
 	        if err != nil {
@@ -288,15 +315,6 @@ func createRole() {
 
 	if err != nil {
 		fmt.Printf("Error copying files: %v\n", err)
-		return
-	}
-
-
-
-        // Remove the cloned repository
-	err = os.RemoveAll(destDir)
-	if err != nil {
-		fmt.Printf("Error removing cloned repository: %v\n", err)
 		return
 	}
 
