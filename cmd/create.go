@@ -38,68 +38,68 @@ are supported and automatically configured.`,
 
 // the questions to ask
 var qs = []*survey.Question{
-    {
-        Name:     "name",
-        Prompt:   &survey.Input{Message: "What is your role called?"},
-        Validate: survey.Required,
-    },
-    {
-        Name:     "author",
-        Prompt:   &survey.Input{Message: "What is your name?"},
-        Validate: survey.Required,
-    },
-    {
-        Name:     "company",
-        Prompt:   &survey.Input{Message: "What is your company?"},
-        Validate: survey.Required,
-    },
-    {
-        Name:     "namespace",
-        Prompt:   &survey.Input{Message: "Which namespace controls the role?"},
-        Validate: survey.Required,
-    },
-    {
-    	Name: "platforms",
-    	Prompt: &survey.MultiSelect{
-    		Message: "Choose one or more platform:",
-    		Options: []string{
-    			"ubuntu2004",
-    			"ubuntu2204",
-    			"rockylinux8",
-    			"rockylinux9",
-    		},
-    	},
-        Validate: survey.Required,
-    },
-    {
-        Name: "license",
-        Prompt: &survey.Select{
-            Message: "Choose a license:",
-            Options: []string{"GPL-2.0-or-later", "GPL-3.0-or-later", "MIT", "BSD"},
-            Default: "MIT",
-        },
-    },
-    {
-        Name:     "description",
-        Prompt:   &survey.Input{Message: "Please enter a short role description."},
-        Validate: survey.Required,
-    },
-    {
-        Name:     "gitinit",
-        Prompt:   &survey.Confirm{Message: "Do you want to init the role as git repository?"},
-        Validate: survey.Required,
-    },
+	{
+		Name:     "name",
+		Prompt:   &survey.Input{Message: "What is your role called?"},
+		Validate: survey.Required,
+	},
+	{
+		Name:     "author",
+		Prompt:   &survey.Input{Message: "What is your name?"},
+		Validate: survey.Required,
+	},
+	{
+		Name:     "company",
+		Prompt:   &survey.Input{Message: "What is your company?"},
+		Validate: survey.Required,
+	},
+	{
+		Name:     "namespace",
+		Prompt:   &survey.Input{Message: "Which namespace controls the role?"},
+		Validate: survey.Required,
+	},
+	{
+		Name: "platforms",
+		Prompt: &survey.MultiSelect{
+			Message: "Choose one or more platform:",
+			Options: []string{
+				"ubuntu2004",
+				"ubuntu2204",
+				"rockylinux8",
+				"rockylinux9",
+			},
+		},
+		Validate: survey.Required,
+	},
+	{
+		Name: "license",
+		Prompt: &survey.Select{
+			Message: "Choose a license:",
+			Options: []string{"GPL-2.0-or-later", "GPL-3.0-or-later", "MIT", "BSD"},
+			Default: "MIT",
+		},
+	},
+	{
+		Name:     "description",
+		Prompt:   &survey.Input{Message: "Please enter a short role description."},
+		Validate: survey.Required,
+	},
+	{
+		Name:     "gitinit",
+		Prompt:   &survey.Confirm{Message: "Do you want to init the role as git repository?"},
+		Validate: survey.Required,
+	},
 }
 
 type Metadata struct {
-        Name string
-        Description string
-        Company string
-        License string
-        Author string
-        Namespace string
-        Platforms []string
-	Gitinit bool
+	Name        string
+	Description string
+	Company     string
+	License     string
+	Author      string
+	Namespace   string
+	Platforms   []string
+	Gitinit     bool
 }
 
 // CheckIfError should be used to naively panics if an error is not nil.
@@ -143,7 +143,7 @@ func confirm() bool {
 }
 
 func cleanup(dir string, err *error) {
-        // Remove the cloned repository
+	// Remove the cloned repository
 	e := os.RemoveAll(dir)
 	switch *err {
 	case nil:
@@ -171,21 +171,21 @@ func init() {
 
 func createRole() {
 
-        // the answers will be written to this struct
-        meta := Metadata{}
-    
-        // perform the questions
-        err := survey.Ask(qs, &meta)
-        if err != nil {
-            fmt.Println(err.Error())
-            return
-        }
-    
-        fmt.Println("Please check you inputs. Is everything correct?")
-        if !confirm() {
-        	fmt.Println("Aborting")
+	// the answers will be written to this struct
+	meta := Metadata{}
+
+	// perform the questions
+	err := survey.Ask(qs, &meta)
+	if err != nil {
+		fmt.Println(err.Error())
 		return
-        }
+	}
+
+	fmt.Println("Please check you inputs. Is everything correct?")
+	if !confirm() {
+		fmt.Println("Aborting")
+		return
+	}
 
 	// Destination directory for copying files (excluding .git)
 	copyDir := meta.Namespace + "." + meta.Name
@@ -197,19 +197,19 @@ func createRole() {
 
 	// URL of the repository to clone
 
-        repoURL := "git@github.com:hpc-unibe-ch/ansible-role-template.git"
+	repoURL := "git@github.com:hpc-unibe-ch/ansible-role-template.git"
 	// Destination directory for cloning the repository
-	destDir, err := os.MkdirTemp("","ant-")
+	destDir, err := os.MkdirTemp("", "ant-")
 	if err != nil {
 		fmt.Printf("Error creating temporary directory: %v\n", err)
 		return
 	}
-        defer cleanup(destDir, &err)
+	defer cleanup(destDir, &err)
 
 	// Clone the repository to the destination directory
 	_, err = git.PlainClone(destDir, false, &git.CloneOptions{
-		URL:  repoURL,
-                Progress: os.Stdout,
+		URL:           repoURL,
+		Progress:      os.Stdout,
 		ReferenceName: plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", "ant")),
 		SingleBranch:  true,
 	})
@@ -218,8 +218,7 @@ func createRole() {
 		return
 	}
 
-
-        // Regular expression pattern to match and replace
+	// Regular expression pattern to match and replace
 	pattern := "template"
 	replace := meta.Name
 
@@ -230,27 +229,26 @@ func createRole() {
 		return
 	}
 
-
 	// Create the copy directory if it doesn't exist
 	if meta.Gitinit {
 		fmt.Printf("Initializing new git repo: %v\n", meta.Gitinit)
 		cmd := exec.Command("git", "init", "-b", "main", copyDir)
-         	err := cmd.Start()
-	        if err != nil {
-	        	fmt.Printf("Error initializing new repository: %v\n", err)
-	        	return
-	        }
-        	err = cmd.Wait()
-	        if err != nil {
-	        	fmt.Printf("Error initializing new repository: %v\n", err)
-	        	return
-	        }
+		err := cmd.Start()
+		if err != nil {
+			fmt.Printf("Error initializing new repository: %v\n", err)
+			return
+		}
+		err = cmd.Wait()
+		if err != nil {
+			fmt.Printf("Error initializing new repository: %v\n", err)
+			return
+		}
 	} else {
-         	err = os.MkdirAll(copyDir, 0755)
-	        if err != nil {
-	        	fmt.Printf("Error creating copy directory: %v\n", err)
-	        	return
-	        }
+		err = os.MkdirAll(copyDir, 0755)
+		if err != nil {
+			fmt.Printf("Error creating copy directory: %v\n", err)
+			return
+		}
 	}
 
 	// Walk through the cloned repository files and copy them to the copy directory
@@ -283,21 +281,21 @@ func createRole() {
 					return err
 				}
 
-                 		// Apply the regular expression replacement
-		                data = re.ReplaceAll(data, []byte(replace))
+				// Apply the regular expression replacement
+				data = re.ReplaceAll(data, []byte(replace))
 
-		                // Apply go templates
-		                tmpl, err := template.New("file").Delims("<<", ">>").Parse(string(data))
-		                if err != nil {
-		                	return err
-		                }
+				// Apply go templates
+				tmpl, err := template.New("file").Delims("<<", ">>").Parse(string(data))
+				if err != nil {
+					return err
+				}
 
-		                //var buf strings.Builder
+				//var buf strings.Builder
 				var buf bytes.Buffer
 				err = tmpl.Execute(&buf, meta)
-		                if err != nil {
-		                	return err
-		                }
+				if err != nil {
+					return err
+				}
 
 				// Create the corresponding file in the copy directory
 				relPath, err := filepath.Rel(destDir, path)
@@ -305,7 +303,7 @@ func createRole() {
 					return err
 				}
 				copyPath := filepath.Join(copyDir, relPath)
-                 		err = os.WriteFile(copyPath, buf.Bytes(), 0644)
+				err = os.WriteFile(copyPath, buf.Bytes(), 0644)
 				if err != nil {
 					return err
 				}
