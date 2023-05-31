@@ -21,7 +21,6 @@ This application is a tool to generate the needed files
 to quickly create a new ansible role from a template repository.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
 	Run: func(cmd *cobra.Command, args []string) {
             if len(args) == 0 {
                 cmd.Help()
