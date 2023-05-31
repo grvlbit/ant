@@ -10,7 +10,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"bytes"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -279,7 +278,7 @@ func createRole() {
 		} else {
 			if filepath.Base(path) != ".git" {
 				// Read the file contents
-				data, err := ioutil.ReadFile(path)
+				data, err := os.ReadFile(path)
 				if err != nil {
 					return err
 				}
@@ -306,8 +305,7 @@ func createRole() {
 					return err
 				}
 				copyPath := filepath.Join(copyDir, relPath)
-                 		//err = ioutil.WriteFile(copyPath, []byte(buf), 0644)
-                 		err = ioutil.WriteFile(copyPath, buf.Bytes(), 0644)
+                 		err = os.WriteFile(copyPath, buf.Bytes(), 0644)
 				if err != nil {
 					return err
 				}

@@ -6,6 +6,7 @@ package cmd
 
 import (
 	"os"
+	"fmt"
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +24,11 @@ to quickly create a new ansible role from a template repository.`,
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
             if len(args) == 0 {
-                cmd.Help()
+	        err := cmd.Help()
+	        if err != nil {
+		    fmt.Printf("Error showing help: %v\n", err)
+	            return
+                }
                 os.Exit(0)
             } 
 	}, 
