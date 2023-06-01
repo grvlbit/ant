@@ -1,14 +1,13 @@
 /*
 Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
 	"fmt"
+	"github.com/spf13/cobra"
 	"log"
 	"os/exec"
-	"github.com/spf13/cobra"
 )
 
 // lintCmd represents the lint command
@@ -57,35 +56,34 @@ func registerLinters() string {
 }
 
 func lint() {
-        fmt.Printf("Checking available linters..\n")
+	fmt.Printf("Checking available linters..\n")
 	linters := registerLinters()
 	if linters != "" {
-                fmt.Printf("Found %s\n", linters)
+		fmt.Printf("Found %s\n", linters)
 	} else {
-                fmt.Printf("No linters found. Please consider installing yamllint and ansible-lint")
+		fmt.Printf("No linters found. Please consider installing yamllint and ansible-lint")
 		return
 	}
 
-
 	if commandExists("yamllint") {
-	        out, err := exec.Command("yamllint",".").Output()
-	        if err != nil {
-                        fmt.Printf("Error linting directory with yamllint: %v\n", err)
-	        	log.Fatal(err)
-	        }
-	        fmt.Printf("%s\n", out)
+		out, err := exec.Command("yamllint", ".").Output()
+		if err != nil {
+			fmt.Printf("Error linting directory with yamllint: %v\n", err)
+			log.Fatal(err)
+		}
+		fmt.Printf("%s\n", out)
 	} else {
-                fmt.Printf("yamllint not found in $PATH. Please consider installing it to use ant lint.")
-        }
+		fmt.Printf("yamllint not found in $PATH. Please consider installing it to use ant lint.")
+	}
 
 	if commandExists("ansible-lint") {
 		out, err := exec.Command("ansible-lint").Output()
-        	if err != nil {
-                        fmt.Printf("Error linting directory with ansible-lint: %v\n", err)
-        		log.Fatal(err)
-        	}
-        	fmt.Printf("%s\n", out)
+		if err != nil {
+			fmt.Printf("Error linting directory with ansible-lint: %v\n", err)
+			log.Fatal(err)
+		}
+		fmt.Printf("%s\n", out)
 	} else {
-                fmt.Printf("ansible-lint not found in $PATH. Please consider installing it to use ant lint.")
-        }
+		fmt.Printf("ansible-lint not found in $PATH. Please consider installing it to use ant lint.")
+	}
 }
