@@ -142,6 +142,16 @@ func confirm() bool {
 
 }
 
+func contains(platforms []string, name string) bool {
+	// iterate over the array and compare given string to each element
+	for _, value := range platforms {
+		if value == name {
+			return true
+		}
+	}
+	return false
+}
+
 func cleanup(dir string, err *error) {
 	// Remove the cloned repository
 	e := os.RemoveAll(dir)
@@ -188,7 +198,7 @@ func createRole() {
 	}
 
 	// Destination directory for copying files (excluding .git)
-	copyDir := meta.Namespace + "." + meta.Name
+	copyDir := "ansible-role-" + meta.Name
 
 	if _, err := os.Stat(copyDir); !os.IsNotExist(err) {
 		fmt.Printf("Error creating role directory: Directory exists.\n")
@@ -219,7 +229,7 @@ func createRole() {
 	}
 
 	// Regular expression pattern to match and replace
-	pattern := "template"
+	pattern := "(?i)Template"
 	replace := meta.Name
 
 	// Compile the regular expression pattern
@@ -312,10 +322,42 @@ func createRole() {
 
 		return nil
 	})
-
 	if err != nil {
 		fmt.Printf("Error copying files: %v\n", err)
 		return
+	}
+
+	// Prune variable files of unused distros
+	if !contains(meta.Platforms, "ubuntu2004") {
+		if err := os.Remove(copyDir + "/vars/" + "Ubuntu-20.yml"); err != nil {
+			log.Fatal(err)
+		}
+	}
+	if !contains(meta.Platforms, "ubuntu2204") {
+		if err := os.Remove(copyDir + "/vars/" + "Ubuntu-22.yml"); err != nil {
+			log.Fatal(err)
+		}
+	}
+	if !contains(meta.Platforms, "ubuntu2004") && !contains(meta.Platforms, "ubuntu2204") {
+		if err := os.Remove(copyDir + "/vars/" + "Debian.yml"); err != nil {
+			log.Fatal(err)
+		}
+	}
+	if !contains(meta.Platforms, "rockylinux8") {
+		// Currently the ansible-role-template doesn't contain any rocky 8 specific files!
+		// if err := os.Remove(copyPath + "/vars/" + "Ubuntu-20.yml"); err != nil {
+		//         log.Fatal(err)
+		// }
+	}
+	if !contains(meta.Platforms, "rockylinux9") {
+		if err := os.Remove(copyDir + "/vars/" + "Rocky-9.yml"); err != nil {
+			log.Fatal(err)
+		}
+	}
+	if !contains(meta.Platforms, "rockylinux8") && !contains(meta.Platforms, "rockylinux9") {
+		if err := os.Remove(copyDir + "/vars/" + "RedHat.yml"); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	fmt.Println("Repository cloned, files modified, and copied successfully.")
