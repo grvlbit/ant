@@ -344,10 +344,9 @@ func createRole() {
 		}
 	}
 	if !contains(meta.Platforms, "rockylinux8") {
-		// Currently the ansible-role-template doesn't contain any rocky 8 specific files!
-		// if err := os.Remove(copyPath + "/vars/" + "Ubuntu-20.yml"); err != nil {
-		//         log.Fatal(err)
-		// }
+		if err := os.Remove(copyDir + "/vars/" + "Rocky-8.yml"); err != nil {
+			log.Fatal(err)
+		}
 	}
 	if !contains(meta.Platforms, "rockylinux9") {
 		if err := os.Remove(copyDir + "/vars/" + "Rocky-9.yml"); err != nil {
