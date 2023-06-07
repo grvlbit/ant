@@ -196,6 +196,7 @@ func createRole() {
 	}
 
 	// URL of the repository to clone
+	repoURL := "https://github.com/hpc-unibe-ch/ansible-role-template.git"
 
 	repoURL := "git@github.com:hpc-unibe-ch/ansible-role-template.git"
 	// Destination directory for cloning the repository
